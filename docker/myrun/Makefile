@@ -13,11 +13,11 @@ build:
 run: build
 	docker run --gpus all --name $(CONTAINER) -p $(PORT):80 -v $(DATA_DIR):/a0 $(IMAGE) $(ARGS)
 
-compose-up:
-	docker-compose -f docker-compose.yml up
+up:
+	docker compose -f docker-compose.yml up
 
-compose-down:
-	docker-compose -f docker-compose.yml down
+down:
+	docker compose -f docker-compose.yml down
 :q
 
 .PHONY: build run compose-up compose-down

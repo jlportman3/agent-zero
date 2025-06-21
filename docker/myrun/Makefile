@@ -17,7 +17,7 @@ up:
 	docker compose -f docker-compose.yml up
 
 down:
-	docker compose -f docker-compose.yml down
-:q
+        docker compose -f docker-compose.yml down
+
 
 .PHONY: build run compose-up compose-down

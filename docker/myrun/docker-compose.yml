@@ -1,8 +1,14 @@
 services:
   agent-zero:
     container_name: agent-zero
-    image: frdel/agent-zero:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BRANCH: development
+    image: agent-zero-run:local
     volumes:
-      - ./agent-zero:/a0
+      - /mypool/agent-zero-data:/a0
     ports:
       - "50080:80"
+

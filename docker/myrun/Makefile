@@ -3,10 +3,17 @@ CONTAINER=agent-zero
 DATA_DIR=/mypool/agent-zero-data
 PORT=50080
 
+CACHE_DATE ?= $(shell date +%Y-%m-%d:%H:%M:%S)
+
 build: clean
 	rm -rf ./fs
 	cp -R ../run/fs .
-	docker build -t agent-zero-run:local --build-arg BRANCH=development --no-cache  .
+	docker build -t $(IMAGE) --build-arg BRANCH=development --build-arg CACHE_DATE=$(CACHE_DATE) .
+
+rebuild: clean
+	rm -rf ./fs
+	cp -R ../run/fs .
+	docker build --no-cache -t $(IMAGE) --build-arg BRANCH=development --build-arg CACHE_DATE=$(shell date +%Y-%m-%d:%H:%M:%S) .
 
 run: build
 	docker run --gpus all --name $(CONTAINER) -p $(PORT):80 -v $(DATA_DIR):/a0 $(IMAGE) $(ARGS)

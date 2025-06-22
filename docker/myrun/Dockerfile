@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         bash curl git build-essential nano \
-        openssh-server supervisor \
+        openssh-server supervisor cron \
         python3-venv libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libasound2 && \
     rm -rf /var/lib/apt/lists/*
 
@@ -34,15 +34,18 @@ RUN mkdir -p /opt \
 
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get upgrade -y
+
+# Install SearXNG search engine
+COPY install_searxng.sh /install_searxng.sh
+RUN chmod +x /install_searxng.sh && \
+    /install_searxng.sh && rm /install_searxng.sh
 # --- Installation Scripts (Agent-Zero) ---
 RUN chmod +x /ins/*.sh /exe/*.sh
 RUN --mount=type=cache,target=/root/.cache \
     bash /ins/pre_install.sh "$BRANCH"
+RUN patch -p0 /ins/install_A0.sh < /patches/fix_install_A0.patch
 RUN --mount=type=cache,target=/root/.cache \
-    bash /ins/install_A0.sh "$BRANCH" && \
-        for p in /patches/*.patch; do \
-            patch -d /git/agent-zero -p1 < "$p"; \
-        done
+    bash /ins/install_A0.sh "$BRANCH"
 RUN --mount=type=cache,target=/root/.cache \
     bash /ins/install_additional.sh "$BRANCH"
 RUN --mount=type=cache,target=/var/cache/apt \

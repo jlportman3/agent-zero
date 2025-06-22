@@ -10,8 +10,11 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         bash curl git build-essential nano \
         openssh-server supervisor \
-	python3-venv \
+        python3-venv \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install uv package manager used by Agent Zero
+RUN curl -Ls https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh
 
 # --- Copy the Agent-Zero Source ---
 # Copy runtime files to /a0 so /a0/ins and /a0/exe are available

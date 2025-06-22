@@ -18,7 +18,7 @@ RUN apt-get update && \
 COPY ./fs/ /
 COPY ./patches/ /patches/
 
-RUN mkdir /opt
+RUN mkdir -p /opt
 RUN python -m venv /opt/venv
 
 # --- Installation Scripts (Agent-Zero) ---

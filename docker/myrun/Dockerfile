@@ -25,6 +25,7 @@ RUN python -m venv /opt/venv
 RUN chmod +x /ins/*.sh /exe/*.sh && \
     bash /ins/pre_install.sh "$BRANCH" && \
     bash /ins/install_A0.sh "$BRANCH" && \
+    python -m playwright install-deps && \
     for p in /patches/*.patch; do \
         patch -d /git/agent-zero -p1 < "$p"; \
     done && \

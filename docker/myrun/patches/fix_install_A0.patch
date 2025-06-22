@@ -1,17 +1,13 @@
---- install_A0.sh
-+++ install_A0.sh
-@@
- git clone -b "$BRANCH" "https://github.com/frdel/agent-zero" "/git/agent-zero" || {
-     echo "CRITICAL ERROR: Failed to clone repository. Branch: $BRANCH"
-     exit 1
+--- a/docker/run/fs/ins/install_A0.sh	2025-06-22 07:23:41.294091242 +0000
++++ b/docker/run/fs/ins/install_A0.sh	2025-06-22 07:23:47.174087585 +0000
+@@ -17,6 +17,10 @@
  }
  
  . "/ins/setup_venv.sh" "$@"
-+
 +# Apply any local patches before installing dependencies
 +for p in /patches/*.patch; do
 +    patch -d /git/agent-zero -p1 < "$p"
 +done
  
- # Install remaining A0 python packages
- uv pip install -r /git/agent-zero/requirements.txt
+ # moved to base image
+ # # Ensure the virtual environment and pip setup

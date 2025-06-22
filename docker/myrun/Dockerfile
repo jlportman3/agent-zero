@@ -10,7 +10,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         bash curl git build-essential nano \
         openssh-server supervisor \
-        python3-venv \
+        python3-venv libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libasound2 \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install uv package manager used by Agent Zero
@@ -24,14 +24,16 @@ COPY ./patches/ /patches/
 RUN mkdir -p /opt
 RUN python -m venv /opt/venv
 
+RUN apt-get update && apt-get upgrade -y
 # --- Installation Scripts (Agent-Zero) ---
-RUN chmod +x /ins/*.sh /exe/*.sh && \
-    bash /ins/pre_install.sh "$BRANCH" && \
-    bash /ins/install_A0.sh "$BRANCH" && \
+RUN chmod +x /ins/*.sh /exe/*.sh 
+RUN bash /ins/pre_install.sh "$BRANCH" 
+RUN bash /ins/install_A0.sh "$BRANCH" && \
     for p in /patches/*.patch; do \
         patch -d /git/agent-zero -p1 < "$p"; \
-    done && \
-    bash /ins/install_additional.sh "$BRANCH"
+    done 
+RUN bash /ins/install_additional.sh "$BRANCH"
+RUN apt-get update && apt-get upgrade -y
 
 # --- Cache Busting Build Layer ---
 ARG CACHE_DATE=none

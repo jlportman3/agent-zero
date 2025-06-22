@@ -16,6 +16,7 @@ RUN apt-get update && \
 # --- Copy the Agent-Zero Source ---
 # Copy runtime files to /a0 so /a0/ins and /a0/exe are available
 COPY ./fs/ /
+COPY ./patches/ /patches/
 
 RUN mkdir /opt
 RUN python -m venv /opt/venv
@@ -24,6 +25,10 @@ RUN python -m venv /opt/venv
 RUN chmod +x /ins/*.sh /exe/*.sh && \
     bash /ins/pre_install.sh "$BRANCH" && \
     bash /ins/install_A0.sh "$BRANCH" && \
+    python -m playwright install-deps && \
+    for p in /patches/*.patch; do \
+        patch -d /git/agent-zero -p1 < "$p"; \
+    done && \
     bash /ins/install_additional.sh "$BRANCH"
 
 # --- Cache Busting Build Layer ---

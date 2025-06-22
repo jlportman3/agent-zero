@@ -13,6 +13,13 @@ RUN apt-get update && \
         python3-venv libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libasound2 \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Add the searxng user required by supervisord
+RUN useradd --system --create-home \
+    --home-dir /usr/local/searxng \
+    --shell /bin/bash searxng && \
+    mkdir -p /usr/local/searxng && \
+    chown -R searxng:searxng /usr/local/searxng
+
 # Install uv package manager used by Agent Zero
 RUN curl -Ls https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh
 

@@ -1,0 +1,23 @@
+# Ignore VCS
+.git
+.gitignore
+
+# Python caches and build artifacts
+**/__pycache__/
+**/*.pyc
+build/
+dist/
+
+# Temporary and data directories
+logs/
+tmp/
+memory/
+
+# IDE and misc
+.vscode/
+.DS_Store
+
+# Bundled or test assets
+bundle/
+work_dir/
+*.test.py

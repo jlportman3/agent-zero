@@ -1,0 +1,39 @@
+--- a/agent.py
++++ b/agent.py
+@@
+-import asyncio
+-import nest_asyncio
++import asyncio
++import httpx
++import nest_asyncio
+@@
+-        async for chunk in (prompt | model).astream({}):
+-            await self.handle_intervention()
+-            content = models.parse_chunk(chunk)
+-            limiter.add(output=tokens.approximate_tokens(content))
+-            response += content
+-            if callback:
+-                await callback(content, response)
++        attempt = 0
++        while True:
++            try:
++                async for chunk in (prompt | model).astream({}):
++                    await self.handle_intervention()
++                    content = models.parse_chunk(chunk)
++                    limiter.add(output=tokens.approximate_tokens(content))
++                    response += content
++                    if callback:
++                        await callback(content, response)
++                break
++            except httpx.ReadError as exc:
++                attempt += 1
++                self.context.log.log(
++                    type="warning",
++                    heading="stream interrupted",
++                    content=str(exc),
++                )
++                if attempt >= 3:
++                    raise
++                await asyncio.sleep(1)
++                response = ""
+         return response

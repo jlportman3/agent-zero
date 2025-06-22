@@ -9,6 +9,6 @@ services:
     image: agent-zero-run:local
     volumes:
       - /mypool/agent-zero-data:/a0
+      - /mypool/agent-zero-root:/root
     ports:
       - "50080:80"
-

@@ -1,27 +1,72 @@
 --- a/agent.py
 +++ b/agent.py
-@@
--import asyncio
--import nest_asyncio
-+import asyncio
+@@ -1,4 +1,5 @@
+ import asyncio
 +import httpx
-+import nest_asyncio
-@@
+ import nest_asyncio
+ 
+ nest_asyncio.apply()
+@@ -630,15 +631,30 @@
+             self.config.utility_model, prompt.format(), background
+         )
+ 
 -        async for chunk in (prompt | model).astream({}):
--            await self.handle_intervention()
+-            await self.handle_intervention()  # wait for intervention and handle it, if paused
+-
 -            content = models.parse_chunk(chunk)
 -            limiter.add(output=tokens.approximate_tokens(content))
 -            response += content
--            if callback:
--                await callback(content, response)
 +        attempt = 0
 +        while True:
 +            try:
 +                async for chunk in (prompt | model).astream({}):
-+                    await self.handle_intervention()
++                    await self.handle_intervention()  # wait for intervention and handle it, if paused
+ 
+-            if callback:
+-                await callback(content)
 +                    content = models.parse_chunk(chunk)
 +                    limiter.add(output=tokens.approximate_tokens(content))
 +                    response += content
++
++                    if callback:
++                        await callback(content)
++                break
++            except httpx.HTTPError as exc:
++                attempt += 1
++                self.context.log.log(
++                    type="warning",
++                    heading="stream interrupted",
++                    content=str(exc),
++                )
++                if attempt >= 3:
++                    raise
++                await asyncio.sleep(1)
++                response = ""
+ 
+         return response
+ 
+@@ -655,15 +671,30 @@
+         # rate limiter
+         limiter = await self.rate_limiter(self.config.chat_model, prompt.format())
+ 
+-        async for chunk in (prompt | model).astream({}):
+-            await self.handle_intervention()  # wait for intervention and handle it, if paused
+-
+-            content = models.parse_chunk(chunk)
+-            limiter.add(output=tokens.approximate_tokens(content))
+-            response += content
++        attempt = 0
++        while True:
++            try:
++                async for chunk in (prompt | model).astream({}):
++                    await self.handle_intervention()  # wait for intervention and handle it, if paused
+ 
+-            if callback:
+-                await callback(content, response)
++                    content = models.parse_chunk(chunk)
++                    limiter.add(output=tokens.approximate_tokens(content))
++                    response += content
++
 +                    if callback:
 +                        await callback(content, response)
 +                break
@@ -36,4 +81,6 @@
 +                    raise
 +                await asyncio.sleep(1)
 +                response = ""
+ 
          return response
+ 

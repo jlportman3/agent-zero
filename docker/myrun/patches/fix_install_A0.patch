@@ -1,11 +1,14 @@
---- a/docker/run/fs/ins/install_A0.sh	2025-06-22 07:23:41.294091242 +0000
-+++ b/docker/run/fs/ins/install_A0.sh	2025-06-22 07:23:47.174087585 +0000
-@@ -17,6 +17,10 @@
+--- a/docker/run/fs/ins/install_A0.sh   2025-06-22 07:23:41.294091242 +0000
++++ b/docker/run/fs/ins/install_A0.sh   2025-06-22 07:23:47.174087585 +0000
+@@ -17,6 +17,13 @@
  }
  
  . "/ins/setup_venv.sh" "$@"
 +# Apply any local patches before installing dependencies
 +for p in /patches/*.patch; do
++    case "$p" in
++        */fix_install_A0.patch) continue ;;
++    esac
 +    patch -d /git/agent-zero -p1 < "$p"
 +done
  

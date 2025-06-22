@@ -2,7 +2,7 @@
 set -e
 
 apt-get update && \
-    apt-get install -y python3.12-dev python3.12-venv \
+    apt-get install -y python3-dev python3-venv \
     git build-essential libxslt-dev zlib1g-dev libffi-dev libssl-dev
 
 useradd --shell /bin/bash --system \

@@ -1,0 +1,8 @@
+--- a/requirements.txt
++++ b/requirements.txt
+@@
+-pdf2image==1.17.0
+-crontab==1.0.1
++pdf2image==1.17.0
++crontab==1.0.1
++supervisor==4.2.5

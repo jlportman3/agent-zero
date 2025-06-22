@@ -31,6 +31,9 @@ COPY ./patches/ /patches/
 
 RUN mkdir -p /opt \
     && python -m venv /opt/venv
+RUN /opt/venv/bin/pip install supervisor
+RUN pip install supervisor
+
 
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get upgrade -y
@@ -43,9 +46,10 @@ RUN chmod +x /install_searxng.sh && \
 RUN chmod +x /ins/*.sh /exe/*.sh
 RUN --mount=type=cache,target=/root/.cache \
     bash /ins/pre_install.sh "$BRANCH"
-RUN patch -p0 /ins/install_A0.sh < /patches/fix_install_A0.patch
+COPY apply_patches.sh /apply_patches.sh
 RUN --mount=type=cache,target=/root/.cache \
     bash /ins/install_A0.sh "$BRANCH"
+RUN chmod +x /apply_patches.sh && /apply_patches.sh
 RUN --mount=type=cache,target=/root/.cache \
     bash /ins/install_additional.sh "$BRANCH"
 RUN --mount=type=cache,target=/var/cache/apt \

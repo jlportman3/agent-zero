@@ -1,9 +1,9 @@
---- a/docker/run/fs/ins/install_A0.sh   2025-06-22 07:23:41.294091242 +0000
-+++ b/docker/run/fs/ins/install_A0.sh   2025-06-22 07:23:47.174087585 +0000
+--- /ins/install_A0.sh
++++ /ins/install_A0.sh
 @@ -17,6 +17,13 @@
- }
  
  . "/ins/setup_venv.sh" "$@"
+ 
 +# Apply any local patches before installing dependencies
 +for p in /patches/*.patch; do
 +    case "$p" in
@@ -11,6 +11,7 @@
 +    esac
 +    patch -d /git/agent-zero -p1 < "$p"
 +done
- 
++
  # moved to base image
  # # Ensure the virtual environment and pip setup
+ # pip install --upgrade pip ipython requests

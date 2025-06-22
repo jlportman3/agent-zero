@@ -1,0 +1,1 @@
+When making changes to this repository, **do not modify the original source tree**. All modifications must be delivered as patch files or additional assets within this directory. Place any patch files in `docker/myrun/patches` so they can be applied during the build process. Do not change files outside `docker/myrun`.

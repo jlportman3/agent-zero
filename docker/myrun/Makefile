@@ -5,7 +5,7 @@ PORT=50080
 
 CACHE_DATE ?= $(shell date +%Y-%m-%d:%H:%M:%S)
 
-build: clean
+build: 
 	rm -rf ./fs
 	cp -R ../run/fs .
 	docker compose -f docker-compose.yml build \

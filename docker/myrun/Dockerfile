@@ -31,8 +31,8 @@ COPY ./patches/ /patches/
 
 RUN mkdir -p /opt \
     && python -m venv /opt/venv
-RUN /opt/venv/bin/pip install supervisor
-RUN pip install supervisor
+RUN /opt/venv/bin/pip install supervisor ipython
+RUN pip install supervisor ipython
 
 
 RUN --mount=type=cache,target=/var/cache/apt \

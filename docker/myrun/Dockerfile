@@ -11,7 +11,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     apt-get install -y --no-install-recommends \
         bash curl git build-essential nano \
         openssh-server supervisor cron \
-        python3-venv libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libasound2 && \
+        python3-venv libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libasound2 \
+        ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 # Add the searxng user required by supervisord

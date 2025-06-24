@@ -1,0 +1,14 @@
+--- a/python/helpers/whisper.py
++++ b/python/helpers/whisper.py
+@@
+-import whisper
++import whisper
++import torch
+@@
+-                _model = whisper.load_model(name=model_name) # type: ignore
++                device = "cuda" if torch.cuda.is_available() else "cpu"
++                _model = whisper.load_model(name=model_name, device=device) # type: ignore
+@@
+-    result = _model.transcribe(audio_file.name, fp16=False) # type: ignore
++    result = _model.transcribe(audio_file.name, fp16=torch.cuda.is_available()) # type: ignore
+     return result

@@ -21,10 +21,10 @@ rebuild: clean
 		--build-arg CACHE_DATE=$(shell date +%Y-%m-%d:%H:%M:%S)
 
 run: build
-	docker compose -f docker-compose.yml up -d
+	docker compose -f docker-compose.yml up -d 
 
 up:
-	docker compose -f docker-compose.yml up -d
+	docker compose -f docker-compose.yml up -d  
 
 down:
 	docker compose -f docker-compose.yml down
@@ -36,4 +36,11 @@ clean:
 build-base:
 	docker build -t $(BASE_IMAGE) ../base
 
-.PHONY: build-base build run up down clean rebuild
+vanilla:
+	rm -rf ./fs
+	cp -R ../run/fs .
+	docker compose -f docker-compose.vanilla.yml build \
+		--build-arg BRANCH=development \
+		--build-arg CACHE_DATE=$(CACHE_DATE)
+
+.PHONY: build-base build run up down clean rebuild vanilla

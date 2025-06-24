@@ -1,15 +1,6 @@
-# Use the pre-built Agent Zero base image for faster builds.
-# Build the base image locally using:
-#   docker build -t agent-zero-base:local ../base
 FROM agent-zero-base:local
 
-# --- Metadata ---
-ARG BRANCH
-ARG CACHE_DATE=none
-ENV BRANCH=${BRANCH:-main}
-
-# --- System Dependencies ---
-# The base image already contains all the necessary system dependencies.
+ARG BRANCH=development
 
 # --- NVIDIA Docker Toolkit ---
 # Install NVIDIA Container Toolkit for GPU support (compatible with driver 535.230.02)
@@ -31,24 +22,35 @@ RUN apt-get update && apt-get install -y \
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
-# --- Copy the Agent-Zero Source ---
-# Copy runtime files to /a0 so /a0/ins and /a0/exe are available
+# Copy filesystem overlay
 COPY ./fs/ /
+
+# Copy patches directory (but won't apply them in vanilla)
 COPY ./patches/ /patches/
 
-
-
-# --- Installation Scripts (Agent-Zero) ---
+# Make scripts executable
 RUN chmod +x /ins/*.sh /exe/*.sh
+
+# Update package list for installation scripts
 RUN apt-get update
+
+# Pre-install dependencies
 RUN --mount=type=cache,target=/root/.cache \
-    bash /ins/pre_install.sh "$BRANCH"
+    bash /ins/pre_install.sh "${BRANCH}"
+
+# Copy apply_patches script (but skip it in vanilla)
 COPY apply_patches.sh /apply_patches.sh
+
+# Install Agent Zero
 RUN --mount=type=cache,target=/root/.cache \
-    bash /ins/install_A0.sh "$BRANCH"
-RUN chmod +x /apply_patches.sh && /apply_patches.sh
+    bash /ins/install_A0.sh "${BRANCH}"
+
+# Skip patch application in vanilla version
+# RUN chmod +x /apply_patches.sh && /apply_patches.sh
+
+# Install additional dependencies
 RUN --mount=type=cache,target=/root/.cache \
-    bash /ins/install_additional.sh "$BRANCH"
+    bash /ins/install_additional.sh "${BRANCH}"
 
 # --- Install CUDA-enabled PyTorch ---
 RUN --mount=type=cache,target=/root/.cache \
@@ -56,19 +58,13 @@ RUN --mount=type=cache,target=/root/.cache \
     pip uninstall -y torch torchvision torchaudio && \
     uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# --- Cache Busting Build Layer ---
+# Install Agent Zero part 2
 RUN --mount=type=cache,target=/root/.cache \
-    echo "cache bust $CACHE_DATE" && bash /ins/install_A02.sh "$BRANCH"
+    echo "cache bust none" && bash /ins/install_A02.sh "${BRANCH}"
 
-# --- Finalize ---
+# Post-install
 RUN --mount=type=cache,target=/root/.cache \
-    bash /ins/post_install.sh "$BRANCH"
+    bash /ins/post_install.sh "${BRANCH}"
 
-# --- Executables ---
+# Make execution scripts executable
 RUN chmod +x /exe/initialize.sh /exe/run_A0.sh /exe/run_searxng.sh /exe/run_tunnel_api.sh
-
-# --- Ports ---
-EXPOSE 22 80 9000-9009
-
-# --- Entrypoint ---
-CMD ["/exe/initialize.sh", "${BRANCH}"]

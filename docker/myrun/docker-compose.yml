@@ -12,4 +12,10 @@ services:
       - /mypool/agent-zero-root:/root
     ports:
       - "50080:80"
-    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

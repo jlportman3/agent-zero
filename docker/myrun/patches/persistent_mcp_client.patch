@@ -1,0 +1,120 @@
+--- a/python/helpers/mcp_handler.py
++++ b/python/helpers/mcp_handler.py
+@@
+ class MCPClientBase(ABC):
+@@
+-    def __init__(self, server: Union[MCPServerLocal, MCPServerRemote]):
+-        self.server = server
+-        self.tools: List[dict[str, Any]] = []  # Tools are cached on the client instance
+-        self.error: str = ""
+-        self.log: List[str] = []
+-        self.log_file: Optional[TextIO] = None
++    def __init__(self, server: Union[MCPServerLocal, MCPServerRemote]):
++        self.server = server
++        self.tools: List[dict[str, Any]] = []  # Tools are cached on the client instance
++        self.error: str = ""
++        self.log: List[str] = []
++        self.log_file: Optional[TextIO] = None
++        self._exit_stack: Optional[AsyncExitStack] = None
++        self._session: Optional[ClientSession] = None
+@@
+-    async def _execute_with_session(
+-        self,
+-        coro_func: Callable[[ClientSession], Awaitable[T]],
+-        read_timeout_seconds=60,
+-    ) -> T:
+-        """
+-        Manages the lifecycle of an MCP session for a single operation.
+-        Creates a temporary session, executes coro_func with it, and ensures cleanup.
+-        """
+-        operation_name = coro_func.__name__  # For logging
+-        # PrintStyle(font_color="cyan").print(f"MCPClientBase ({self.server.name}): Creating new session for operation '{operation_name}'...")
+-        # Store the original exception outside the async block
+-        original_exception = None
+-        try:
+-            async with AsyncExitStack() as temp_stack:
+-                try:
+-
+-                    stdio, write = await self._create_stdio_transport(temp_stack)
+-                    # PrintStyle(font_color="cyan").print(f"MCPClientBase ({self.server.name} - {operation_name}): Transport created. Initializing session...")
+-                    session = await temp_stack.enter_async_context(
+-                        ClientSession(
+-                            stdio,  # type: ignore
+-                            write,  # type: ignore
+-                            read_timeout_seconds=timedelta(
+-                                seconds=read_timeout_seconds
+-                            ),
+-                        )
+-                    )
+-                    await session.initialize()
+-
+-                    result = await coro_func(session)
+-
+-                    return result
+-                except Exception as e:
+-                    # Store the original exception and raise a dummy exception
+-                    excs = getattr(e, "exceptions", None)  # Python 3.11+ ExceptionGroup
+-                    if excs:
+-                        original_exception = excs[0]
+-                    else:
+-                        original_exception = e
+-                    # Create a dummy exception to break out of the async block
+-                    raise RuntimeError("Dummy exception to break out of async block")
+-        except Exception as e:
+-            # Check if this is our dummy exception
+-            if original_exception is not None:
+-                e = original_exception
+-            # We have the original exception stored
+-            PrintStyle(
+-                background_color="#AA4455", font_color="white", padding=False
+-            ).print(
+-                f"MCPClientBase ({self.server.name} - {operation_name}): Error during operation: {type(e).__name__}: {e}"
+-            )
+-            raise e  # Re-raise the original exception
+-        # finally:
+-        #     PrintStyle(font_color="cyan").print(
+-        #         f"MCPClientBase ({self.server.name} - {operation_name}): Session and transport will be closed by AsyncExitStack."
+-        #     )
+-        # This line should ideally be unreachable if the try/except/finally logic within the 'async with' is exhaustive.
+-        # Adding it to satisfy linters that might not fully trace the raise/return paths through async context managers.
+-        raise RuntimeError(
+-            f"MCPClientBase ({self.server.name} - {operation_name}): _execute_with_session exited 'async with' block unexpectedly."
+-        )
++    async def _ensure_session(self, read_timeout_seconds: int) -> ClientSession:
++        if self._session is None:
++            self._exit_stack = AsyncExitStack()
++            stdio, write = await self._create_stdio_transport(self._exit_stack)
++            self._session = await self._exit_stack.enter_async_context(
++                ClientSession(
++                    stdio,  # type: ignore
++                    write,  # type: ignore
++                    read_timeout_seconds=timedelta(seconds=read_timeout_seconds),
++                )
++            )
++            await self._session.initialize()
++        return self._session
++
++    async def _execute_with_session(
++        self,
++        coro_func: Callable[[ClientSession], Awaitable[T]],
++        read_timeout_seconds=60,
++    ) -> T:
++        operation_name = coro_func.__name__
++        try:
++            session = await self._ensure_session(read_timeout_seconds)
++            return await coro_func(session)
++        except Exception as e:
++            PrintStyle(
++                background_color="#AA4455", font_color="white", padding=False
++            ).print(
++                f"MCPClientBase ({self.server.name} - {operation_name}): Error during operation: {type(e).__name__}: {e}"
++            )
++            await self.aclose()
++            raise
++
++    async def aclose(self) -> None:
++        if self._exit_stack is not None:
++            await self._exit_stack.aclose()
++            self._exit_stack = None
++            self._session = None
+

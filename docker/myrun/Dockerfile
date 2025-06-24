@@ -9,43 +9,15 @@ ARG CACHE_DATE=none
 ENV BRANCH=${BRANCH:-main}
 
 # --- System Dependencies ---
-RUN --mount=type=cache,target=/var/cache/apt \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-        bash curl git build-essential nano \
-        openssh-server supervisor cron \
-        python3-venv libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libasound2 \
-        ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
-
-# Add the searxng user required by supervisord
-RUN useradd --system --create-home \
-    --home-dir /usr/local/searxng \
-    --shell /bin/bash searxng && \
-    mkdir -p /usr/local/searxng && \
-    chown -R searxng:searxng /usr/local/searxng
-
-# Install uv package manager used by Agent Zero
-RUN curl -Ls https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh
+# The base image already contains all the necessary system dependencies.
 
 # --- Copy the Agent-Zero Source ---
 # Copy runtime files to /a0 so /a0/ins and /a0/exe are available
 COPY ./fs/ /
 COPY ./patches/ /patches/
 
-RUN mkdir -p /opt \
-    && python -m venv /opt/venv
-RUN /opt/venv/bin/pip install supervisor ipython
-RUN pip install supervisor ipython
 
 
-RUN --mount=type=cache,target=/var/cache/apt \
-    apt-get update && apt-get upgrade -y
-
-# Install SearXNG search engine
-COPY install_searxng.sh /install_searxng.sh
-RUN chmod +x /install_searxng.sh && \
-    /install_searxng.sh && rm /install_searxng.sh
 # --- Installation Scripts (Agent-Zero) ---
 RUN chmod +x /ins/*.sh /exe/*.sh
 RUN --mount=type=cache,target=/root/.cache \
@@ -56,8 +28,6 @@ RUN --mount=type=cache,target=/root/.cache \
 RUN chmod +x /apply_patches.sh && /apply_patches.sh
 RUN --mount=type=cache,target=/root/.cache \
     bash /ins/install_additional.sh "$BRANCH"
-RUN --mount=type=cache,target=/var/cache/apt \
-    apt-get update && apt-get upgrade -y
 
 # --- Cache Busting Build Layer ---
 RUN --mount=type=cache,target=/root/.cache \

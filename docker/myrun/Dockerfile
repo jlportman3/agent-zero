@@ -1,4 +1,7 @@
-FROM python:3.12-slim
+# Use the pre-built Agent Zero base image for faster builds.
+# Build the base image locally using:
+#   docker build -t agent-zero-base:local ../base
+FROM agent-zero-base:local
 
 # --- Metadata ---
 ARG BRANCH

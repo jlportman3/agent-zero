@@ -1,4 +1,5 @@
 IMAGE=agent-zero-run:local
+BASE_IMAGE=agent-zero-base:local
 CONTAINER=agent-zero
 DATA_DIR=/mypool/agent-zero-data
 PORT=50080
@@ -29,8 +30,9 @@ down:
 	docker compose -f docker-compose.yml down
 
 clean:
-	docker container prune -f
-	docker image prune -af
+        docker container prune -f
+        docker image prune -af
 
-
-.PHONY: build run up down clean
+.PHONY: build-base build run up down clean
+build-base:
+    docker build -t $(BASE_IMAGE) ../base

@@ -1,0 +1,30 @@
+--- a/python/helpers/mcp_handler.py
++++ b/python/helpers/mcp_handler.py
+@@ -270,7 +270,12 @@ class MCPServerRemote:
+ 
+                     setattr(self, key, value)
+             # We already run in an event loop, dont believe Pylance
+-            return asyncio.run(self.__on_update())
++            loop = asyncio.get_event_loop()
++            if loop.is_running():
++                loop.create_task(self.__on_update())
++            else:
++                asyncio.run(self.__on_update())
++        return self
+ 
+     async def __on_update(self) -> "MCPServerRemote":
+         await self.__client.update_tools()  # type: ignore
+@@ -344,7 +349,12 @@ class MCPServerLocal:
+                         value = normalize_name(value)
+                     setattr(self, key, value)
+             # We already run in an event loop, dont believe Pylance
+-            return asyncio.run(self.__on_update())
++            loop = asyncio.get_event_loop()
++            if loop.is_running():
++                loop.create_task(self.__on_update())
++            else:
++                asyncio.run(self.__on_update())
++        return self
+ 
+     async def __on_update(self) -> "MCPServerLocal":
+         await self.__client.update_tools()  # type: ignore

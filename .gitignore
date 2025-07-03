@@ -6,6 +6,8 @@
 
 # Ignore docker/run/agent-zero directory
 docker/run/agent-zero/
+docker/myrun/agent-zero/
+docker/myrun/fs
 
 #Ignore cursor rules
 .cursor/

@@ -1,0 +1,56 @@
+ext	
+Could not find document for id 2f80b763-1df7-4761-ab27-0415b336fee0, got ID 2f80b763-1df7-4761-ab27-0415b336fee0 not found.
+Copy
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/a0/agent.py", line 334, in monologue
+    prompt = await self.prepare_prompt(loop_data=self.loop_data)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/a0/agent.py", line 423, in prepare_prompt
+    await self.call_extensions("message_loop_prompts_after", loop_data=loop_data)
+  File "/a0/agent.py", line 833, in call_extensions
+    await cls(agent=self).execute(**kwargs)
+  File "/a0/python/extensions/message_loop_prompts_after/_91_recall_wait.py", line 13, in execute
+    await task
+  File "/usr/lib/python3.12/asyncio/futures.py", line 289, in __await__
+    yield self  # This tells Task to wait for completion.
+    ^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/tasks.py", line 385, in __wakeup
+    future.result()
+  File "/usr/lib/python3.12/asyncio/futures.py", line 202, in result
+    raise self._exception.with_traceback(self._exception_tb)
+  File "/usr/lib/python3.12/asyncio/tasks.py", line 316, in __step_run_and_handle_result
+    result = coro.throw(exc)
+             ^^^^^^^^^^^^^^^
+  File "/a0/python/extensions/message_loop_prompts_after/_50_recall_memories.py", line 69, in search_memories
+    memories = await db.search_similarity_threshold(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/a0/python/helpers/memory.py", line 303, in search_similarity_threshold
+    return await self.db.asearch(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/langchain_core/vectorstores/base.py", line 380, in asearch
+    docs_and_similarities = await self.asimilarity_search_with_relevance_scores(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/langchain_core/vectorstores/base.py", line 603, in asimilarity_search_with_relevance_scores
+    docs_and_similarities = await self._asimilarity_search_with_relevance_scores(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+>>>  12 stack lines skipped <<<
+
+  File "/usr/lib/python3.12/asyncio/futures.py", line 289, in __await__
+    yield self  # This tells Task to wait for completion.
+    ^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/tasks.py", line 385, in __wakeup
+    future.result()
+  File "/usr/lib/python3.12/asyncio/futures.py", line 202, in result
+    raise self._exception.with_traceback(self._exception_tb)
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/langchain_core/runnables/config.py", line 613, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/langchain_community/vectorstores/faiss.py", line 430, in similarity_search_with_score_by_vector
+    raise ValueError(f"Could not find document for id {_id}, got {doc}")
+ValueError: Could not find document for id 2f80b763-1df7-4761-ab27-0415b336fee0, got ID 2f80b763-1df7-4761-ab27-0415b336fee0 not found.
+

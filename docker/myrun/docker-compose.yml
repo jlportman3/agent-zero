@@ -8,7 +8,8 @@ services:
         BRANCH: development
     image: agent-zero-run:local
     volumes:
-      - /mypool/agent-zero-data:/a0
+      - ./agent-zero:/a0
+      - /mypool/agent-zero-data/memory:/a0/memory
       - /mypool/agent-zero-root:/root
     ports:
       - "50080:80"

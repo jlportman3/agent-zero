@@ -8,9 +8,9 @@ CACHE_DATE ?= $(shell date +%Y-%m-%d:%H:%M:%S)
 
 build:
 	rm -rf ./fs
-	rm -rf ./agent-zero
+	#rm -rf ./agent-zero
 	cp -R ../run/fs .
-	cp -r ../run/agent-zero .
+	#cp -r ../run/agent-zero .
 	docker compose -f docker-compose.yml build \
 		--build-arg BRANCH=main \
 		--build-arg CACHE_DATE=$(CACHE_DATE)
